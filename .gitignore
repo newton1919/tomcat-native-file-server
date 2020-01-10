@@ -1,0 +1,9 @@
+*.iml
+.project
+.settings/
+bin/
+log/
+target/
+.classpath
+authsdk4.properties
+.idea/
