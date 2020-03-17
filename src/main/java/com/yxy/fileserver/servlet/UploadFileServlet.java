@@ -38,10 +38,15 @@ public class UploadFileServlet extends HttpServlet {
     InputStream is = part.getInputStream();
     //动态获取tomcat服务器的路径
     String serverpath = req.getServletContext().getRealPath("upload");
-    Files.createDirectory(Paths.get(serverpath));
-    Files.createDirectory(Paths.get(serverpath, appName));
-    Files.createDirectory(Paths.get(serverpath, appName, type));
-
+    if (!Files.exists(Paths.get(serverpath))) {
+      Files.createDirectory(Paths.get(serverpath));
+    }
+    if (!Files.exists(Paths.get(serverpath, appName))) {
+      Files.createDirectory(Paths.get(serverpath, appName));
+    }
+    if (!Files.exists(Paths.get(serverpath, appName, type))) {
+      Files.createDirectory(Paths.get(serverpath, appName, type));
+    }
     Path fileDir = Paths.get(serverpath, appName, type);
     FileOutputStream fos = new FileOutputStream(fileDir + "/" + filename);
     byte[] bty = new byte[1024];
