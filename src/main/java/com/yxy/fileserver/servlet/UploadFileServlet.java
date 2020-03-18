@@ -1,6 +1,9 @@
 package com.yxy.fileserver.servlet;
 
+import com.yxy.fileserver.config.BusinessException;
 import com.yxy.fileserver.utils.CommonUtils;
+import com.yxy.fileserver.utils.ServletUtils;
+import com.yxy.fileserver.utils.TokenCheckUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -8,12 +11,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -25,6 +31,14 @@ import java.util.UUID;
 public class UploadFileServlet extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    // 验证token
+    try {
+      TokenCheckUtil.checkToken(req);
+    } catch (BusinessException ex) {
+      ServletUtils.setResponseException(resp, ex);
+      return;
+    }
+
     Part part = req.getPart("file");//获取上传的文件
     String appName = req.getParameter("app");//spring boot 应用名字
     String type = req.getParameter("type");//该应用下文件的用途
@@ -56,5 +70,11 @@ public class UploadFileServlet extends HttpServlet {
     }
     fos.close();
     is.close();
+
+    //返回文件路径给前端
+    Map<String, Object> resultMap = new HashMap<>();
+    resultMap.put("fileUrl", "upload" + File.separator + appName + File.separator + type + File.separator + filename);
+    ServletUtils.setResponseJson(resp, resultMap);
+    return;
   }
 }
